@@ -1,5 +1,3 @@
-import psycopg2
-from psycopg2.extras import RealDictCursor
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -9,7 +7,16 @@ from dotenv import load_dotenv
 load_dotenv()
 
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
-if not SQLALCHEMY_DATABASE_URL:
+
+# Log a masked version of the URL for debugging (hide password)
+if SQLALCHEMY_DATABASE_URL:
+    # Show just the scheme and host portion for debugging
+    parts = SQLALCHEMY_DATABASE_URL.split("@")
+    if len(parts) > 1:
+        print(f"DATABASE_URL is set, connecting to: ...@{parts[-1]}")
+    else:
+        print("DATABASE_URL is set")
+else:
     raise ValueError("DATABASE_URL environment variable is not set")
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
@@ -24,20 +31,3 @@ def get_db():
         yield db
     finally:
         db.close()
-
-
-try:
-    conn = psycopg2.connect(host=os.getenv("DB_HOST"),
-                           port=os.getenv("DB_PORT"), 
-                           database=os.getenv("DB_NAME"), 
-                           user=os.getenv("DB_USER"), 
-                           password=os.getenv("DB_PASSWORD"), 
-                           cursor_factory=RealDictCursor)
-
-    cursor = conn.cursor()
-    print("Database connection was successful!")
-except Exception as error:
-    print("Connection to database failed")
-    print("Error:", error)
-
-
