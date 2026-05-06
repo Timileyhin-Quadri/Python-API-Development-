@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Maytimide
+      POSTGRES_DB: fastapi
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    command: ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--reload-dir", "app"]
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+    environment:
+      DATABASE_URL: postgresql://postgres:Maytimide@db:5432/fastapi
+      SECRET_KEY: 0f1faaf9f19889339b8692fad64ab7f6546a8c651cd720c2a78145e14a53c819
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 60
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

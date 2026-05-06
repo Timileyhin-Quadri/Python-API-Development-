@@ -24,7 +24,7 @@ app.add_middleware(
 @app.get("/")
 def root():
     """Root endpoint - Health check"""
-    return {"message": "Welcome to FastAPI", "status": "running"}
+    return {"message": "Welcome to FastAPI", "status": "running!!!!!!!!!!!!!!!!!!!!!!"}
 
 app.include_router(post.router)
 app.include_router(user.router)

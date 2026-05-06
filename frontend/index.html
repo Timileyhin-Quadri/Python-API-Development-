@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PostFlow - A modern social platform for sharing ideas, powered by FastAPI. Create, share, and vote on posts.">
+    <title>PostFlow — Share Your Ideas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- ═══════════════ NAVBAR ═══════════════ -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo" id="nav-logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">PostFlow</span>
+            </a>
+            <div class="nav-search" id="nav-search-container">
+                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                <input type="text" id="search-input" placeholder="Search posts..." autocomplete="off">
+            </div>
+            <div class="nav-actions">
+                <!-- Logged out -->
+                <div id="auth-buttons" class="nav-auth">
+                    <button class="btn btn-ghost" id="btn-login" onclick="showModal('login')">Log In</button>
+                    <button class="btn btn-primary" id="btn-register" onclick="showModal('register')">Sign Up</button>
+                </div>
+                <!-- Logged in -->
+                <div id="user-menu" class="nav-user hidden">
+                    <button class="btn btn-primary btn-create" id="btn-new-post" onclick="showModal('create-post')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                        <span>New Post</span>
+                    </button>
+                    <div class="user-avatar-wrap" id="user-avatar-btn" onclick="toggleUserDropdown()">
+                        <div class="user-avatar" id="user-avatar">U</div>
+                    </div>
+                    <div class="user-dropdown hidden" id="user-dropdown">
+                        <div class="dropdown-header">
+                            <div class="dropdown-email" id="dropdown-email">user@email.com</div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item" onclick="showMyPosts()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                            My Posts
+                        </button>
+                        <button class="dropdown-item danger" id="btn-logout" onclick="logout()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            Sign Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- Mobile hamburger -->
+            <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMobileMenu()">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile menu -->
+    <div class="mobile-menu hidden" id="mobile-menu">
+        <div id="mobile-auth-buttons">
+            <button class="btn btn-ghost btn-block" onclick="showModal('login'); closeMobileMenu()">Log In</button>
+            <button class="btn btn-primary btn-block" onclick="showModal('register'); closeMobileMenu()">Sign Up</button>
+        </div>
+        <div id="mobile-user-menu" class="hidden">
+            <div class="mobile-user-info" id="mobile-user-email"></div>
+            <button class="btn btn-primary btn-block" onclick="showModal('create-post'); closeMobileMenu()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                New Post
+            </button>
+            <button class="btn btn-ghost btn-block" onclick="showMyPosts(); closeMobileMenu()">My Posts</button>
+            <button class="btn btn-ghost btn-block danger-text" onclick="logout(); closeMobileMenu()">Sign Out</button>
+        </div>
+        <div class="mobile-search">
+            <input type="text" id="mobile-search-input" placeholder="Search posts..." autocomplete="off">
+        </div>
+    </div>
+
+    <!-- ═══════════════ HERO ═══════════════ -->
+    <header class="hero" id="hero-section">
+        <div class="hero-bg-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+        <div class="hero-content">
+            <h1 class="hero-title">Share Ideas That <span class="gradient-text">Spark</span> Conversations</h1>
+            <p class="hero-subtitle">A modern platform to create, share, and discover posts. Join the community, upvote what inspires you.</p>
+            <div class="hero-cta">
+                <button class="btn btn-primary btn-lg" id="hero-cta-btn" onclick="handleHeroCTA()">Get Started</button>
+                <button class="btn btn-outline btn-lg" onclick="document.getElementById('feed-section').scrollIntoView({behavior:'smooth'})">Explore Posts</button>
+            </div>
+            <div class="hero-stats" id="hero-stats">
+                <div class="stat">
+                    <span class="stat-number" id="stat-posts">—</span>
+                    <span class="stat-label">Posts</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat">
+                    <span class="stat-number" id="stat-votes">—</span>
+                    <span class="stat-label">Votes</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat">
+                    <span class="stat-number">∞</span>
+                    <span class="stat-label">Ideas</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ═══════════════ FEED ═══════════════ -->
+    <main class="feed-section" id="feed-section">
+        <div class="feed-container">
+            <div class="feed-header">
+                <h2 class="feed-title" id="feed-title">Latest Posts</h2>
+                <div class="feed-controls">
+                    <button class="btn btn-ghost btn-sm active" id="btn-all-posts" onclick="showAllPosts()">All Posts</button>
+                </div>
+            </div>
+
+            <!-- Loading skeleton -->
+            <div class="posts-grid" id="posts-skeleton">
+                <div class="post-card skeleton"><div class="skeleton-title"></div><div class="skeleton-text"></div><div class="skeleton-text short"></div><div class="skeleton-footer"></div></div>
+                <div class="post-card skeleton"><div class="skeleton-title"></div><div class="skeleton-text"></div><div class="skeleton-text short"></div><div class="skeleton-footer"></div></div>
+                <div class="post-card skeleton"><div class="skeleton-title"></div><div class="skeleton-text"></div><div class="skeleton-text short"></div><div class="skeleton-footer"></div></div>
+            </div>
+
+            <!-- Posts container -->
+            <div class="posts-grid hidden" id="posts-grid"></div>
+
+            <!-- Empty state -->
+            <div class="empty-state hidden" id="empty-state">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+                <h3>No posts yet</h3>
+                <p id="empty-state-msg">Be the first to share something!</p>
+            </div>
+
+            <!-- Load more -->
+            <div class="load-more hidden" id="load-more">
+                <button class="btn btn-outline" id="btn-load-more" onclick="loadMorePosts()">Load More</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- ═══════════════ FOOTER ═══════════════ -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <span class="logo-icon">⚡</span> PostFlow
+            </div>
+            <p class="footer-text">Powered by FastAPI · Built with ❤️</p>
+        </div>
+    </footer>
+
+    <!-- ═══════════════ MODALS ═══════════════ -->
+    <div class="modal-overlay hidden" id="modal-overlay" onclick="closeModal(event)">
+        <!-- Login Modal -->
+        <div class="modal hidden" id="modal-login">
+            <button class="modal-close" onclick="hideAllModals()">✕</button>
+            <div class="modal-header">
+                <h2>Welcome Back</h2>
+                <p>Log in to your account</p>
+            </div>
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" placeholder="you@example.com" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <div class="password-wrap">
+                        <input type="password" id="login-password" placeholder="Enter your password" required autocomplete="current-password">
+                        <button type="button" class="password-toggle" onclick="togglePassword('login-password', this)">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-error hidden" id="login-error"></div>
+                <button type="submit" class="btn btn-primary btn-block btn-lg" id="login-submit">
+                    <span class="btn-text">Log In</span>
+                    <span class="btn-spinner hidden"></span>
+                </button>
+            </form>
+            <div class="modal-footer">
+                Don't have an account? <button class="link-btn" onclick="switchModal('register')">Sign Up</button>
+            </div>
+        </div>
+
+        <!-- Register Modal -->
+        <div class="modal hidden" id="modal-register">
+            <button class="modal-close" onclick="hideAllModals()">✕</button>
+            <div class="modal-header">
+                <h2>Create Account</h2>
+                <p>Join the community today</p>
+            </div>
+            <form id="register-form" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" placeholder="you@example.com" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <div class="password-wrap">
+                        <input type="password" id="register-password" placeholder="Min. 6 characters" required minlength="6" maxlength="72" autocomplete="new-password">
+                        <button type="button" class="password-toggle" onclick="togglePassword('register-password', this)">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                    <span class="form-hint">Must be 6–72 characters</span>
+                </div>
+                <div class="form-group">
+                    <label for="register-confirm">Confirm Password</label>
+                    <div class="password-wrap">
+                        <input type="password" id="register-confirm" placeholder="Repeat your password" required minlength="6" maxlength="72" autocomplete="new-password">
+                        <button type="button" class="password-toggle" onclick="togglePassword('register-confirm', this)">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-error hidden" id="register-error"></div>
+                <button type="submit" class="btn btn-primary btn-block btn-lg" id="register-submit">
+                    <span class="btn-text">Create Account</span>
+                    <span class="btn-spinner hidden"></span>
+                </button>
+            </form>
+            <div class="modal-footer">
+                Already have an account? <button class="link-btn" onclick="switchModal('login')">Log In</button>
+            </div>
+        </div>
+
+        <!-- Create/Edit Post Modal -->
+        <div class="modal hidden" id="modal-create-post">
+            <button class="modal-close" onclick="hideAllModals()">✕</button>
+            <div class="modal-header">
+                <h2 id="post-modal-title">Create Post</h2>
+                <p id="post-modal-subtitle">Share something with the community</p>
+            </div>
+            <form id="post-form" onsubmit="handlePostSubmit(event)">
+                <input type="hidden" id="edit-post-id" value="">
+                <div class="form-group">
+                    <label for="post-title">Title</label>
+                    <input type="text" id="post-title" placeholder="Give your post a catchy title" required maxlength="200">
+                    <span class="char-count"><span id="title-char-count">0</span>/200</span>
+                </div>
+                <div class="form-group">
+                    <label for="post-content">Content</label>
+                    <textarea id="post-content" placeholder="What's on your mind?" required rows="5"></textarea>
+                </div>
+                <div class="form-group form-check-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="post-published" checked>
+                        <span class="checkmark"></span>
+                        Publish immediately
+                    </label>
+                </div>
+                <div class="form-error hidden" id="post-error"></div>
+                <button type="submit" class="btn btn-primary btn-block btn-lg" id="post-submit">
+                    <span class="btn-text">Publish</span>
+                    <span class="btn-spinner hidden"></span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Post Detail Modal -->
+        <div class="modal modal-lg hidden" id="modal-post-detail">
+            <button class="modal-close" onclick="hideAllModals()">✕</button>
+            <div id="post-detail-content"></div>
+        </div>
+    </div>
+
+    <!-- ═══════════════ TOAST ═══════════════ -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
